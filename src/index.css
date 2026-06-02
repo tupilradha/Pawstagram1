@@ -391,3 +391,228 @@ html, body, #root {
 .bottom-nav__tab--active .bottom-nav__icon {
   filter: drop-shadow(0 0 6px rgba(224,122,58,0.4));
 }
+
+/* ── Dog Switcher ────────────────────────────────────── */
+.dog-switcher {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 16px;
+  max-width: 480px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.dog-switcher__trigger {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.dog-switcher__trigger:hover { border-color: var(--accent); }
+
+.dog-switcher__avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  border: 2px solid var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 700; color: var(--accent);
+  overflow: hidden; flex-shrink: 0;
+}
+
+.dog-switcher__avatar img {
+  width: 100%; height: 100%; object-fit: cover;
+}
+
+.dog-switcher__name {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700; font-size: 15px;
+  flex: 1; text-align: left;
+}
+
+.dog-switcher__chevron {
+  font-size: 10px; color: var(--text-muted);
+}
+
+.dog-switcher__backdrop {
+  position: fixed; inset: 0; z-index: 49;
+}
+
+.dog-switcher__menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 16px; right: 16px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  box-shadow: 0 8px 32px rgba(100,60,20,0.12);
+  z-index: 51;
+  overflow: hidden;
+}
+
+.dog-switcher__option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.dog-switcher__option:hover { background: var(--accent-soft); }
+
+.dog-switcher__option--active { background: var(--accent-soft); }
+
+.dog-switcher__option-avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  border: 2px solid var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 700; color: var(--accent);
+  overflow: hidden; flex-shrink: 0;
+}
+
+.dog-switcher__option-avatar img {
+  width: 100%; height: 100%; object-fit: cover;
+}
+
+.dog-switcher__option-info {
+  flex: 1;
+  display: flex; flex-direction: column;
+}
+
+.dog-switcher__option-name {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700; font-size: 14px;
+}
+
+.dog-switcher__option-meta {
+  font-size: 12px; color: var(--text-muted);
+}
+
+.dog-switcher__check {
+  color: var(--accent); font-weight: 700; font-size: 14px;
+}
+
+.dog-switcher__delete {
+  background: none; border: none;
+  color: var(--text-muted); font-size: 13px;
+  cursor: pointer; padding: 4px 6px;
+  border-radius: 6px;
+  transition: background 0.12s, color 0.12s;
+}
+
+.dog-switcher__delete:hover {
+  background: #fde8e6; color: var(--red);
+}
+
+.dog-switcher__divider {
+  height: 1px; background: var(--border); margin: 4px 0;
+}
+
+.dog-switcher__add {
+  width: 100%; background: none; border: none;
+  padding: 12px 14px; text-align: left;
+  font-family: 'Nunito', sans-serif;
+  font-size: 14px; font-weight: 700;
+  color: var(--accent); cursor: pointer;
+  transition: background 0.12s;
+}
+
+.dog-switcher__add:hover { background: var(--accent-soft); }
+
+/* ── App layout update (account for switcher) ────────── */
+.app__main {
+  padding-top: 8px;
+}
+
+/* ── Page dog label ──────────────────────────────────── */
+.page__dog-label {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: -10px 0 14px;
+  font-style: italic;
+}
+
+/* ── Back button ─────────────────────────────────────── */
+.btn-back {
+  background: none; border: none;
+  font-family: 'Nunito', sans-serif;
+  font-size: 14px; font-weight: 700;
+  color: var(--accent); cursor: pointer;
+  padding: 4px 0;
+}
+
+/* ── Photo upload ────────────────────────────────────── */
+.photo-upload {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 12px;
+}
+
+.photo-upload__preview {
+  width: 90px; height: 90px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  border: 3px solid var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+
+.photo-upload__preview img {
+  width: 100%; height: 100%; object-fit: cover;
+}
+
+.photo-upload__placeholder { font-size: 36px; }
+
+/* ── Stats grid (Home) ───────────────────────────────── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 14px;
+  display: flex; flex-direction: column;
+  align-items: flex-start; gap: 3px;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  transition: border-color 0.15s, transform 0.1s;
+}
+
+.stat-card:hover { border-color: var(--accent); }
+.stat-card:active { transform: scale(0.98); }
+
+.stat-card__icon { font-size: 22px; margin-bottom: 2px; }
+
+.stat-card__value {
+  font-family: 'Nunito', sans-serif;
+  font-size: 28px; font-weight: 800;
+  color: var(--text); line-height: 1;
+}
+
+.stat-card__label {
+  font-size: 12px; color: var(--text-muted); font-weight: 600;
+}
+
+.stat-card__sub {
+  font-size: 11px; color: var(--text-muted); margin-top: 2px;
+}
+
+.stat-card__sub--red    { color: var(--red); }
+.stat-card__sub--yellow { color: var(--yellow); }
+.stat-card__sub--green  { color: var(--green); }

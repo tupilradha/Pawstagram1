@@ -1,6 +1,7 @@
 // src/pages/Vaccines.jsx
 import { useState, useEffect } from "react";
-import { getVaccines, saveVaccine, deleteVaccine, getDogs } from "../db/db";
+import { getVaccines, saveVaccine, deleteVaccine } from "../db/db";
+import { useDog } from "../context/DogContext";
 
 const EMPTY_FORM = { name: "", dateGiven: "", nextDueDate: "" };
 
@@ -15,36 +16,32 @@ function getStatus(nextDueDate) {
 }
 
 const STATUS_BADGE = {
-  overdue:  { label: "Overdue",  cls: "badge badge--red"    },
-  upcoming: { label: "Due Soon", cls: "badge badge--yellow" },
-  ok:       { label: "Up to date", cls: "badge badge--green" },
+  overdue:  { label: "Overdue",     cls: "badge badge--red"    },
+  upcoming: { label: "Due Soon",    cls: "badge badge--yellow" },
+  ok:       { label: "Up to date",  cls: "badge badge--green"  },
 };
 
 export default function Vaccines() {
+  const { activeDogId, activeDog } = useDog();
   const [vaccines, setVaccines] = useState([]);
-  const [dogId, setDogId] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [adding, setAdding] = useState(false);
 
   useEffect(() => {
-    const dogs = getDogs();
-    if (dogs[0]) {
-      setDogId(dogs[0].id);
-      setVaccines(getVaccines(dogs[0].id));
-    }
-  }, []);
+    if (activeDogId) setVaccines(getVaccines(activeDogId));
+  }, [activeDogId]);
 
   function handleSave() {
-    if (!dogId) return;
-    saveVaccine({ ...form, dogId });
-    setVaccines(getVaccines(dogId));
+    if (!activeDogId) return;
+    saveVaccine({ ...form, dogId: activeDogId });
+    setVaccines(getVaccines(activeDogId));
     setForm(EMPTY_FORM);
     setAdding(false);
   }
 
   function handleDelete(id) {
     deleteVaccine(id);
-    setVaccines(getVaccines(dogId));
+    setVaccines(getVaccines(activeDogId));
   }
 
   return (
@@ -54,6 +51,8 @@ export default function Vaccines() {
         <button className="btn btn--primary btn--sm" onClick={() => setAdding(true)}>+ Add</button>
       </header>
 
+      {activeDog && <p className="page__dog-label">for {activeDog.name}</p>}
+
       {adding && (
         <div className="card">
           <h2 className="card__title">New Vaccine</h2>
@@ -62,15 +61,12 @@ export default function Vaccines() {
             <input className="form__input" value={form.name}
               onChange={e => setForm({ ...form, name: e.target.value })}
               placeholder="e.g. Rabies, Parvovirus" />
-
             <label className="form__label">Date Given</label>
             <input className="form__input" type="date" value={form.dateGiven}
               onChange={e => setForm({ ...form, dateGiven: e.target.value })} />
-
             <label className="form__label">Next Due Date</label>
             <input className="form__input" type="date" value={form.nextDueDate}
               onChange={e => setForm({ ...form, nextDueDate: e.target.value })} />
-
             <div className="form__actions">
               <button className="btn btn--secondary" onClick={() => setAdding(false)}>Cancel</button>
               <button className="btn btn--primary" onClick={handleSave}>Save</button>
@@ -96,9 +92,7 @@ export default function Vaccines() {
                 <span className="list-item__title">{v.name}</span>
                 <span className={badge.cls}>{badge.label}</span>
               </div>
-              <p className="list-item__sub">
-                Given: {v.dateGiven || "—"} · Due: {v.nextDueDate || "—"}
-              </p>
+              <p className="list-item__sub">Given: {v.dateGiven || "—"} · Due: {v.nextDueDate || "—"}</p>
               <button className="btn btn--danger btn--xs" onClick={() => handleDelete(v.id)}>Delete</button>
             </div>
           );

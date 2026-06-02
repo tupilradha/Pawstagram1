@@ -1,6 +1,7 @@
 // src/pages/Medications.jsx
 import { useState, useEffect } from "react";
-import { getMedications, saveMedication, deleteMedication, getDogs } from "../db/db";
+import { getMedications, saveMedication, deleteMedication } from "../db/db";
+import { useDog } from "../context/DogContext";
 
 const EMPTY_FORM = { name: "", dosage: "", frequency: "", startDate: "", endDate: "" };
 
@@ -10,31 +11,27 @@ function isActive(med) {
 }
 
 export default function Medications() {
+  const { activeDogId, activeDog } = useDog();
   const [meds, setMeds] = useState([]);
-  const [dogId, setDogId] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [adding, setAdding] = useState(false);
   const [tab, setTab] = useState("active");
 
   useEffect(() => {
-    const dogs = getDogs();
-    if (dogs[0]) {
-      setDogId(dogs[0].id);
-      setMeds(getMedications(dogs[0].id));
-    }
-  }, []);
+    if (activeDogId) setMeds(getMedications(activeDogId));
+  }, [activeDogId]);
 
   function handleSave() {
-    if (!dogId) return;
-    saveMedication({ ...form, dogId });
-    setMeds(getMedications(dogId));
+    if (!activeDogId) return;
+    saveMedication({ ...form, dogId: activeDogId });
+    setMeds(getMedications(activeDogId));
     setForm(EMPTY_FORM);
     setAdding(false);
   }
 
   function handleDelete(id) {
     deleteMedication(id);
-    setMeds(getMedications(dogId));
+    setMeds(getMedications(activeDogId));
   }
 
   const filtered = meds.filter(m => tab === "active" ? isActive(m) : !isActive(m));
@@ -46,9 +43,11 @@ export default function Medications() {
         <button className="btn btn--primary btn--sm" onClick={() => setAdding(true)}>+ Add</button>
       </header>
 
+      {activeDog && <p className="page__dog-label">for {activeDog.name}</p>}
+
       <div className="tabs">
         <button className={`tab ${tab === "active" ? "tab--active" : ""}`} onClick={() => setTab("active")}>Active</button>
-        <button className={`tab ${tab === "past" ? "tab--active" : ""}`} onClick={() => setTab("past")}>Past</button>
+        <button className={`tab ${tab === "past"   ? "tab--active" : ""}`} onClick={() => setTab("past")}>Past</button>
       </div>
 
       {adding && (
@@ -59,25 +58,20 @@ export default function Medications() {
             <input className="form__input" value={form.name}
               onChange={e => setForm({ ...form, name: e.target.value })}
               placeholder="e.g. Amoxicillin" />
-
             <label className="form__label">Dosage</label>
             <input className="form__input" value={form.dosage}
               onChange={e => setForm({ ...form, dosage: e.target.value })}
               placeholder="e.g. 250mg" />
-
             <label className="form__label">Frequency</label>
             <input className="form__input" value={form.frequency}
               onChange={e => setForm({ ...form, frequency: e.target.value })}
               placeholder="e.g. Twice daily" />
-
             <label className="form__label">Start Date</label>
             <input className="form__input" type="date" value={form.startDate}
               onChange={e => setForm({ ...form, startDate: e.target.value })} />
-
             <label className="form__label">End Date (optional)</label>
             <input className="form__input" type="date" value={form.endDate}
               onChange={e => setForm({ ...form, endDate: e.target.value })} />
-
             <div className="form__actions">
               <button className="btn btn--secondary" onClick={() => setAdding(false)}>Cancel</button>
               <button className="btn btn--primary" onClick={handleSave}>Save</button>

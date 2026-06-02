@@ -1,6 +1,7 @@
 // src/pages/Symptoms.jsx
 import { useState, useEffect } from "react";
-import { getSymptoms, saveSymptom, deleteSymptom, getDogs } from "../db/db";
+import { getSymptoms, saveSymptom, deleteSymptom } from "../db/db";
+import { useDog } from "../context/DogContext";
 
 const EMPTY_FORM = { date: "", description: "", severity: "mild" };
 
@@ -11,30 +12,26 @@ const SEVERITY = {
 };
 
 export default function Symptoms() {
+  const { activeDogId, activeDog } = useDog();
   const [symptoms, setSymptoms] = useState([]);
-  const [dogId, setDogId] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [adding, setAdding] = useState(false);
 
   useEffect(() => {
-    const dogs = getDogs();
-    if (dogs[0]) {
-      setDogId(dogs[0].id);
-      setSymptoms(getSymptoms(dogs[0].id));
-    }
-  }, []);
+    if (activeDogId) setSymptoms(getSymptoms(activeDogId));
+  }, [activeDogId]);
 
   function handleSave() {
-    if (!dogId) return;
-    saveSymptom({ ...form, dogId });
-    setSymptoms(getSymptoms(dogId));
+    if (!activeDogId) return;
+    saveSymptom({ ...form, dogId: activeDogId });
+    setSymptoms(getSymptoms(activeDogId));
     setForm(EMPTY_FORM);
     setAdding(false);
   }
 
   function handleDelete(id) {
     deleteSymptom(id);
-    setSymptoms(getSymptoms(dogId));
+    setSymptoms(getSymptoms(activeDogId));
   }
 
   return (
@@ -44,6 +41,8 @@ export default function Symptoms() {
         <button className="btn btn--primary btn--sm" onClick={() => setAdding(true)}>+ Add</button>
       </header>
 
+      {activeDog && <p className="page__dog-label">for {activeDog.name}</p>}
+
       {adding && (
         <div className="card">
           <h2 className="card__title">Log Symptom</h2>
@@ -51,13 +50,10 @@ export default function Symptoms() {
             <label className="form__label">Date</label>
             <input className="form__input" type="date" value={form.date}
               onChange={e => setForm({ ...form, date: e.target.value })} />
-
             <label className="form__label">Description</label>
             <textarea className="form__textarea" value={form.description}
               onChange={e => setForm({ ...form, description: e.target.value })}
-              placeholder="Describe the symptom or observation..."
-              rows={3} />
-
+              placeholder="Describe the symptom or observation..." rows={3} />
             <label className="form__label">Severity</label>
             <div className="radio-group">
               {["mild", "moderate", "severe"].map(s => (
@@ -69,7 +65,6 @@ export default function Symptoms() {
                 </label>
               ))}
             </div>
-
             <div className="form__actions">
               <button className="btn btn--secondary" onClick={() => setAdding(false)}>Cancel</button>
               <button className="btn btn--primary" onClick={handleSave}>Save</button>
