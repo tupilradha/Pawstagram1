@@ -5,7 +5,7 @@ const tabs = [
   { to: "/",            icon: "🏠", label: "Home"     },
   { to: "/vet-visits",  icon: "🏥", label: "Vet"      },
   { to: "/vaccines",    icon: "💉", label: "Vaccines"  },
-  { to: "/medications", icon: "💊", label: "Meds"      },
+  { to: "/timeline",    icon: "📊", label: "Timeline"  },
   { to: "/my-dogs",     icon: "🐾", label: "My Dogs"   },
 ];
 
