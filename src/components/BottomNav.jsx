@@ -1,28 +1,35 @@
-// src/components/BottomNav.jsx
+// src/components/BottomNav.jsx — M3 Navigation Bar
 import { NavLink } from "react-router-dom";
 
 const tabs = [
-  { to: "/",            icon: "🏠", label: "Home"     },
-  { to: "/vet-visits",  icon: "🏥", label: "Vet"      },
-  { to: "/vaccines",    icon: "💉", label: "Vaccines"  },
-  { to: "/timeline",    icon: "📊", label: "Timeline"  },
-  { to: "/my-dogs",     icon: "🐾", label: "My Dogs"   },
+  { to: "/",           label: "Home",     activeIcon: "🏠",  inactiveIcon: "🏠"  },
+  { to: "/vet-visits", label: "Vet",      activeIcon: "🏥",  inactiveIcon: "🏥"  },
+  { to: "/vaccines",   label: "Vaccines", activeIcon: "💉",  inactiveIcon: "💉"  },
+  { to: "/timeline",   label: "Timeline", activeIcon: "📊",  inactiveIcon: "📊"  },
 ];
 
 export default function BottomNav() {
   return (
-    <nav className="bottom-nav">
-      {tabs.map(({ to, icon, label }) => (
+    <nav className="m3-nav" role="navigation" aria-label="Main navigation">
+      {tabs.map(({ to, label, activeIcon, inactiveIcon }) => (
         <NavLink
           key={to}
           to={to}
           end={to === "/"}
           className={({ isActive }) =>
-            `bottom-nav__tab ${isActive ? "bottom-nav__tab--active" : ""}`
+            `m3-nav__item ${isActive ? "m3-nav__item--active" : ""}`
           }
         >
-          <span className="bottom-nav__icon">{icon}</span>
-          <span className="bottom-nav__label">{label}</span>
+          {({ isActive }) => (
+            <>
+              <span className="m3-nav__indicator" aria-hidden="true">
+                <span className="m3-nav__icon">
+                  {isActive ? activeIcon : inactiveIcon}
+                </span>
+              </span>
+              <span className="m3-nav__label">{label}</span>
+            </>
+          )}
         </NavLink>
       ))}
     </nav>

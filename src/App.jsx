@@ -6,7 +6,6 @@ import BottomNav   from "./components/BottomNav";
 import Onboarding  from "./pages/Onboarding";
 import Home        from "./pages/Home";
 import DogProfile  from "./pages/DogProfile";
-import MyDogs      from "./pages/MyDogs";
 import VetVisits   from "./pages/VetVisits";
 import Vaccines    from "./pages/Vaccines";
 import Medications from "./pages/Medications";
@@ -19,15 +18,15 @@ function AppShell() {
   if (!hasDogs) {
     return (
       <Routes>
-        <Route path="*"          element={<Onboarding />} />
-        <Route path="/profile/:id" element={<DogProfile />} />
+        <Route path="*"            element={<Onboarding />}  />
+        <Route path="/profile/:id" element={<DogProfile />}  />
       </Routes>
     );
   }
 
   return (
-    <div className="app">
-      <main className="app__main">
+    <div className="m3-app">
+      <main className="m3-app__main">
         <Routes>
           <Route path="/"                element={<Home />}        />
           <Route path="/vet-visits"      element={<VetVisits />}   />
@@ -35,7 +34,6 @@ function AppShell() {
           <Route path="/medications"     element={<Medications />} />
           <Route path="/symptoms"        element={<Symptoms />}    />
           <Route path="/timeline"        element={<Timeline />}    />
-          <Route path="/my-dogs"         element={<MyDogs />}      />
           <Route path="/profile/:id"     element={<DogProfile />}  />
         </Routes>
       </main>
