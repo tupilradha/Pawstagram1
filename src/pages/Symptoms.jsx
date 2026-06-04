@@ -2,6 +2,8 @@
 import { useState, useEffect } from "react";
 import { getSymptoms, saveSymptom, deleteSymptom } from "../db/db";
 import { useDog } from "../context/DogContext";
+import { validateSymptomForm } from "../utils/validate";
+import FieldError from "../components/FieldError";
 
 const EMPTY_FORM = { date: "", description: "", severity: "mild" };
 
@@ -14,22 +16,32 @@ const SEVERITY = {
 export default function Symptoms() {
   const { activeDogId, activeDog } = useDog();
   const [symptoms, setSymptoms] = useState([]);
-  const [form, setForm] = useState(EMPTY_FORM);
-  const [adding, setAdding] = useState(false);
+  const [form, setForm]         = useState(EMPTY_FORM);
+  const [errors, setErrors]     = useState({});
+  const [adding, setAdding]     = useState(false);
 
   useEffect(() => {
     if (activeDogId) setSymptoms(getSymptoms(activeDogId));
   }, [activeDogId]);
 
   function handleSave() {
-    if (!activeDogId) return;
+    const { valid, errors: errs } = validateSymptomForm(form);
+    if (!valid) { setErrors(errs); return; }
+    setErrors({});
     saveSymptom({ ...form, dogId: activeDogId });
     setSymptoms(getSymptoms(activeDogId));
     setForm(EMPTY_FORM);
     setAdding(false);
   }
 
+  function handleCancel() {
+    setAdding(false);
+    setErrors({});
+    setForm(EMPTY_FORM);
+  }
+
   function handleDelete(id) {
+    if (!window.confirm("Delete this symptom record?")) return;
     deleteSymptom(id);
     setSymptoms(getSymptoms(activeDogId));
   }
@@ -38,22 +50,29 @@ export default function Symptoms() {
     <div className="page">
       <header className="page__header">
         <h1 className="page__title">📝 Symptoms</h1>
-        <button className="btn btn--primary btn--sm" onClick={() => setAdding(true)}>+ Add</button>
+        {!adding && <button className="btn btn--primary btn--sm" onClick={() => setAdding(true)}>+ Add</button>}
       </header>
-
       {activeDog && <p className="page__dog-label">for {activeDog.name}</p>}
 
       {adding && (
         <div className="card">
           <h2 className="card__title">Log Symptom</h2>
           <div className="form">
-            <label className="form__label">Date</label>
-            <input className="form__input" type="date" value={form.date}
+            <label className="form__label">Date *</label>
+            <input className={`form__input ${errors.date ? "form__input--error" : ""}`}
+              type="date" value={form.date}
+              max={new Date().toISOString().split("T")[0]}
               onChange={e => setForm({ ...form, date: e.target.value })} />
-            <label className="form__label">Description</label>
-            <textarea className="form__textarea" value={form.description}
+            <FieldError msg={errors.date} />
+
+            <label className="form__label">Description *</label>
+            <textarea className={`form__textarea ${errors.description ? "form__input--error" : ""}`}
+              value={form.description} maxLength={300}
               onChange={e => setForm({ ...form, description: e.target.value })}
               placeholder="Describe the symptom or observation..." rows={3} />
+            <div className="form__char-count">{form.description.length}/300</div>
+            <FieldError msg={errors.description} />
+
             <label className="form__label">Severity</label>
             <div className="radio-group">
               {["mild", "moderate", "severe"].map(s => (
@@ -65,8 +84,9 @@ export default function Symptoms() {
                 </label>
               ))}
             </div>
+
             <div className="form__actions">
-              <button className="btn btn--secondary" onClick={() => setAdding(false)}>Cancel</button>
+              <button className="btn btn--secondary" onClick={handleCancel}>Cancel</button>
               <button className="btn btn--primary" onClick={handleSave}>Save</button>
             </div>
           </div>

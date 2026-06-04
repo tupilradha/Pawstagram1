@@ -2,28 +2,40 @@
 import { useState, useEffect } from "react";
 import { getVetVisits, saveVetVisit, deleteVetVisit } from "../db/db";
 import { useDog } from "../context/DogContext";
+import { validateVetVisitForm } from "../utils/validate";
+import FieldError from "../components/FieldError";
 
 const EMPTY_FORM = { date: "", clinic: "", vet: "", reason: "", notes: "" };
 
 export default function VetVisits() {
   const { activeDogId, activeDog } = useDog();
-  const [visits, setVisits] = useState([]);
-  const [form, setForm] = useState(EMPTY_FORM);
-  const [adding, setAdding] = useState(false);
+  const [visits, setVisits]   = useState([]);
+  const [form, setForm]       = useState(EMPTY_FORM);
+  const [errors, setErrors]   = useState({});
+  const [adding, setAdding]   = useState(false);
 
   useEffect(() => {
     if (activeDogId) setVisits(getVetVisits(activeDogId));
   }, [activeDogId]);
 
   function handleSave() {
-    if (!activeDogId) return;
+    const { valid, errors: errs } = validateVetVisitForm(form);
+    if (!valid) { setErrors(errs); return; }
+    setErrors({});
     saveVetVisit({ ...form, dogId: activeDogId });
     setVisits(getVetVisits(activeDogId));
     setForm(EMPTY_FORM);
     setAdding(false);
   }
 
+  function handleCancel() {
+    setAdding(false);
+    setErrors({});
+    setForm(EMPTY_FORM);
+  }
+
   function handleDelete(id) {
+    if (!window.confirm("Delete this vet visit?")) return;
     deleteVetVisit(id);
     setVisits(getVetVisits(activeDogId));
   }
@@ -32,36 +44,51 @@ export default function VetVisits() {
     <div className="page">
       <header className="page__header">
         <h1 className="page__title">🏥 Vet Visits</h1>
-        <button className="btn btn--primary btn--sm" onClick={() => setAdding(true)}>+ Add</button>
+        {!adding && <button className="btn btn--primary btn--sm" onClick={() => setAdding(true)}>+ Add</button>}
       </header>
-
       {activeDog && <p className="page__dog-label">for {activeDog.name}</p>}
 
       {adding && (
         <div className="card">
           <h2 className="card__title">New Vet Visit</h2>
           <div className="form">
-            <label className="form__label">Date</label>
-            <input className="form__input" type="date" value={form.date}
+            <label className="form__label">Date *</label>
+            <input className={`form__input ${errors.date ? "form__input--error" : ""}`}
+              type="date" value={form.date}
+              max={new Date().toISOString().split("T")[0]}
               onChange={e => setForm({ ...form, date: e.target.value })} />
-            <label className="form__label">Clinic</label>
-            <input className="form__input" value={form.clinic}
-              onChange={e => setForm({ ...form, clinic: e.target.value })}
-              placeholder="e.g. Paws & Care Clinic" />
-            <label className="form__label">Vet Name</label>
-            <input className="form__input" value={form.vet}
-              onChange={e => setForm({ ...form, vet: e.target.value })}
-              placeholder="e.g. Dr. Sharma" />
-            <label className="form__label">Reason for Visit</label>
-            <input className="form__input" value={form.reason}
+            <FieldError msg={errors.date} />
+
+            <label className="form__label">Reason for Visit *</label>
+            <input className={`form__input ${errors.reason ? "form__input--error" : ""}`}
+              value={form.reason} maxLength={100}
               onChange={e => setForm({ ...form, reason: e.target.value })}
               placeholder="e.g. Annual check-up" />
+            <FieldError msg={errors.reason} />
+
+            <label className="form__label">Clinic</label>
+            <input className={`form__input ${errors.clinic ? "form__input--error" : ""}`}
+              value={form.clinic} maxLength={100}
+              onChange={e => setForm({ ...form, clinic: e.target.value })}
+              placeholder="e.g. Paws & Care Clinic" />
+            <FieldError msg={errors.clinic} />
+
+            <label className="form__label">Vet Name</label>
+            <input className={`form__input ${errors.vet ? "form__input--error" : ""}`}
+              value={form.vet} maxLength={100}
+              onChange={e => setForm({ ...form, vet: e.target.value })}
+              placeholder="e.g. Dr. Sharma" />
+            <FieldError msg={errors.vet} />
+
             <label className="form__label">Notes</label>
-            <textarea className="form__textarea" value={form.notes}
+            <textarea className="form__textarea" value={form.notes} maxLength={500}
               onChange={e => setForm({ ...form, notes: e.target.value })}
               placeholder="Diagnosis, prescriptions, follow-ups..." rows={3} />
+            <div className="form__char-count">{form.notes.length}/500</div>
+            <FieldError msg={errors.notes} />
+
             <div className="form__actions">
-              <button className="btn btn--secondary" onClick={() => setAdding(false)}>Cancel</button>
+              <button className="btn btn--secondary" onClick={handleCancel}>Cancel</button>
               <button className="btn btn--primary" onClick={handleSave}>Save</button>
             </div>
           </div>

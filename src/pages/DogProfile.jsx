@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { saveDog, getDog } from "../db/db";
 import { useDog } from "../context/DogContext";
+import { validateDogForm, isValidImageSize } from "../utils/validate";
+import FieldError from "../components/FieldError";
 
 export default function DogProfile() {
   const { id } = useParams();
@@ -10,8 +12,9 @@ export default function DogProfile() {
   const navigate = useNavigate();
   const { refreshDogs, setActiveDogId } = useDog();
 
-  const [form, setForm] = useState({ name: "", breed: "", age: "", bio: "", photoUrl: "" });
+  const [form, setForm]     = useState({ name: "", breed: "", age: "", bio: "", photoUrl: "" });
   const [preview, setPreview] = useState(null);
+  const [errors, setErrors]   = useState({});
 
   useEffect(() => {
     if (!isNew && id) {
@@ -26,6 +29,11 @@ export default function DogProfile() {
   function handlePhoto(e) {
     const file = e.target.files[0];
     if (!file) return;
+    if (!isValidImageSize(file)) {
+      setErrors(prev => ({ ...prev, photo: "Photo must be under 1MB. Please choose a smaller image." }));
+      return;
+    }
+    setErrors(prev => ({ ...prev, photo: null }));
     const reader = new FileReader();
     reader.onload = ev => {
       setPreview(ev.target.result);
@@ -35,7 +43,9 @@ export default function DogProfile() {
   }
 
   function handleSave() {
-    if (!form.name.trim()) return alert("Please enter a name for your dog.");
+    const { valid, errors: errs } = validateDogForm(form);
+    if (!valid) { setErrors(errs); return; }
+    setErrors({});
     const saved = { ...form, ...(isNew ? {} : { id }) };
     saveDog(saved);
     refreshDogs();
@@ -56,7 +66,6 @@ export default function DogProfile() {
       </header>
 
       <div className="card">
-        {/* Photo upload */}
         <div className="photo-upload">
           <div className="photo-upload__preview">
             {preview
@@ -68,28 +77,53 @@ export default function DogProfile() {
             {preview ? "Change Photo" : "Upload Photo"}
             <input type="file" accept="image/*" onChange={handlePhoto} style={{ display: "none" }} />
           </label>
+          <FieldError msg={errors.photo} />
         </div>
 
         <div className="form" style={{ marginTop: 20 }}>
           <label className="form__label">Name *</label>
-          <input className="form__input" value={form.name}
+          <input
+            className={`form__input ${errors.name ? "form__input--error" : ""}`}
+            value={form.name}
             onChange={e => setForm({ ...form, name: e.target.value })}
-            placeholder="e.g. Buddy" />
+            placeholder="e.g. Buddy"
+            maxLength={50}
+          />
+          <FieldError msg={errors.name} />
 
           <label className="form__label">Breed</label>
-          <input className="form__input" value={form.breed}
+          <input
+            className={`form__input ${errors.breed ? "form__input--error" : ""}`}
+            value={form.breed}
             onChange={e => setForm({ ...form, breed: e.target.value })}
-            placeholder="e.g. Labrador Retriever" />
+            placeholder="e.g. Labrador Retriever"
+            maxLength={60}
+          />
+          <FieldError msg={errors.breed} />
 
           <label className="form__label">Age (years)</label>
-          <input className="form__input" type="number" value={form.age}
+          <input
+            className={`form__input ${errors.age ? "form__input--error" : ""}`}
+            type="number"
+            value={form.age}
             onChange={e => setForm({ ...form, age: e.target.value })}
-            placeholder="e.g. 3" />
+            placeholder="e.g. 3"
+            min={0}
+            max={30}
+          />
+          <FieldError msg={errors.age} />
 
           <label className="form__label">Bio / Notes</label>
-          <textarea className="form__textarea" value={form.bio}
+          <textarea
+            className={`form__textarea ${errors.bio ? "form__input--error" : ""}`}
+            value={form.bio}
             onChange={e => setForm({ ...form, bio: e.target.value })}
-            placeholder="Anything special about your dog..." rows={3} />
+            placeholder="Anything special about your dog..."
+            rows={3}
+            maxLength={300}
+          />
+          <div className="form__char-count">{form.bio.length}/300</div>
+          <FieldError msg={errors.bio} />
 
           <button className="btn btn--primary" style={{ marginTop: 8 }} onClick={handleSave}>
             {isNew ? "Add Dog" : "Save Changes"}
