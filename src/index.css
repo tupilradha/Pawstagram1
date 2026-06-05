@@ -981,3 +981,131 @@ html, body, #root {
   gap: 8px;
   margin-top: 4px;
 }
+
+/* ── App layout — no nav bar ────────────────────────── */
+.m3-app__main {
+  padding-bottom: 24px;
+}
+
+/* ── Home — no bottom padding for nav ───────────────── */
+.home-dark {
+  padding-bottom: 32px;
+}
+
+/* ── DogDetail profile ──────────────────────────────── */
+.detail-profile {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--md-sys-color-surface-container);
+  border-radius: var(--md-sys-shape-corner-extra-large);
+  padding: 16px;
+  margin-bottom: 16px;
+  margin-top: 12px;
+}
+
+.detail-profile__avatar {
+  width: 56px; height: 56px;
+  border-radius: var(--md-sys-shape-corner-full);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; font-weight: 500;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.detail-profile__info { flex: 1; min-width: 0; }
+
+.detail-profile__name {
+  font-size: var(--md-sys-typescale-title-large);
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface);
+  margin-bottom: 2px;
+}
+
+.detail-profile__meta {
+  font-size: var(--md-sys-typescale-body-medium);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.detail-profile__bio {
+  font-size: var(--md-sys-typescale-body-medium);
+  color: var(--md-sys-color-on-surface-variant);
+  margin-top: 4px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.detail-profile__edit {
+  background: var(--md-sys-color-surface-container-high);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-corner-full);
+  padding: 7px 16px;
+  font-family: 'Roboto', sans-serif;
+  font-size: var(--md-sys-typescale-label-large);
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+.detail-profile__edit:hover {
+  background: var(--md-sys-color-surface-container-highest);
+}
+
+/* ── DogDetail tiles ────────────────────────────────── */
+.detail-tiles {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detail-tile {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--md-sys-color-surface-container);
+  border-radius: var(--md-sys-shape-corner-large);
+  padding: 16px;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+
+.detail-tile:hover  { background: var(--md-sys-color-surface-container-high); }
+.detail-tile:active { transform: scale(0.98); }
+
+.detail-tile__icon  { font-size: 24px; flex-shrink: 0; }
+
+.detail-tile__body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.detail-tile__label {
+  font-size: var(--md-sys-typescale-title-small);
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface);
+}
+
+.detail-tile__status {
+  font-size: var(--md-sys-typescale-label-medium);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.detail-tile__status--red   { color: #F28B82; }
+.detail-tile__status--amber { color: #FFB74D; }
+.detail-tile__status--green { color: #6EE59A; }
+
+.detail-tile__count {
+  font-size: var(--md-sys-typescale-title-large);
+  font-weight: 400;
+  color: var(--md-sys-color-on-surface-variant);
+  flex-shrink: 0;
+}
+
+.detail-tile__arrow {
+  font-size: 22px;
+  color: var(--md-sys-color-on-surface-variant);
+  flex-shrink: 0;
+}
