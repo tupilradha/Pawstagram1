@@ -947,3 +947,37 @@ html, body, #root {
   color: var(--md-sys-color-on-surface-variant);
   margin-top: 10px;
 }
+
+/* ── Timeline quick-add ──────────────────────────────── */
+.tl-quick-add {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.tl-quick-btn {
+  flex: 1;
+  padding: 10px;
+  border-radius: var(--md-sys-shape-corner-full);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  background: var(--md-sys-color-surface-container);
+  font-family: 'Roboto', sans-serif;
+  font-size: var(--md-sys-typescale-label-large);
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface-variant);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.tl-quick-btn:hover {
+  background: var(--md-sys-color-surface-container-high);
+  color: var(--md-sys-color-primary);
+  border-color: var(--md-sys-color-primary);
+}
+
+/* ── List item actions ───────────────────────────────── */
+.list-item__actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}

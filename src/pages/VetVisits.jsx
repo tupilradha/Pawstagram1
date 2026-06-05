@@ -12,27 +12,35 @@ export default function VetVisits() {
   const [visits, setVisits]   = useState([]);
   const [form, setForm]       = useState(EMPTY_FORM);
   const [errors, setErrors]   = useState({});
-  const [adding, setAdding]   = useState(false);
+  const [editingId, setEditingId] = useState(null); // null = closed, "new" = adding, id = editing
 
   useEffect(() => {
     if (activeDogId) setVisits(getVetVisits(activeDogId));
   }, [activeDogId]);
 
+  function handleAdd() {
+    setForm(EMPTY_FORM);
+    setErrors({});
+    setEditingId("new");
+  }
+
+  function handleEdit(v) {
+    setForm({ date: v.date, clinic: v.clinic, vet: v.vet, reason: v.reason, notes: v.notes });
+    setErrors({});
+    setEditingId(v.id);
+  }
+
   function handleSave() {
     const { valid, errors: errs } = validateVetVisitForm(form);
     if (!valid) { setErrors(errs); return; }
     setErrors({});
-    saveVetVisit({ ...form, dogId: activeDogId });
+    saveVetVisit({ ...form, dogId: activeDogId, ...(editingId !== "new" ? { id: editingId } : {}) });
     setVisits(getVetVisits(activeDogId));
     setForm(EMPTY_FORM);
-    setAdding(false);
+    setEditingId(null);
   }
 
-  function handleCancel() {
-    setAdding(false);
-    setErrors({});
-    setForm(EMPTY_FORM);
-  }
+  function handleCancel() { setEditingId(null); setErrors({}); setForm(EMPTY_FORM); }
 
   function handleDelete(id) {
     if (!window.confirm("Delete this vet visit?")) return;
@@ -40,22 +48,23 @@ export default function VetVisits() {
     setVisits(getVetVisits(activeDogId));
   }
 
+  const today = new Date().toISOString().split("T")[0];
+
   return (
     <div className="page">
       <header className="page__header">
         <h1 className="page__title">🏥 Vet Visits</h1>
-        {!adding && <button className="btn btn--primary btn--sm" onClick={() => setAdding(true)}>+ Add</button>}
+        {!editingId && <button className="btn btn--primary btn--sm" onClick={handleAdd}>+ Add</button>}
       </header>
       {activeDog && <p className="page__dog-label">for {activeDog.name}</p>}
 
-      {adding && (
+      {editingId && (
         <div className="card">
-          <h2 className="card__title">New Vet Visit</h2>
+          <h2 className="card__title">{editingId === "new" ? "New Vet Visit" : "Edit Vet Visit"}</h2>
           <div className="form">
             <label className="form__label">Date *</label>
             <input className={`form__input ${errors.date ? "form__input--error" : ""}`}
-              type="date" value={form.date}
-              max={new Date().toISOString().split("T")[0]}
+              type="date" value={form.date} max={today}
               onChange={e => setForm({ ...form, date: e.target.value })} />
             <FieldError msg={errors.date} />
 
@@ -85,17 +94,18 @@ export default function VetVisits() {
               onChange={e => setForm({ ...form, notes: e.target.value })}
               placeholder="Diagnosis, prescriptions, follow-ups..." rows={3} />
             <div className="form__char-count">{form.notes.length}/500</div>
-            <FieldError msg={errors.notes} />
 
             <div className="form__actions">
               <button className="btn btn--secondary" onClick={handleCancel}>Cancel</button>
-              <button className="btn btn--primary" onClick={handleSave}>Save</button>
+              <button className="btn btn--primary" onClick={handleSave}>
+                {editingId === "new" ? "Save" : "Update"}
+              </button>
             </div>
           </div>
         </div>
       )}
 
-      {visits.length === 0 && !adding && (
+      {visits.length === 0 && !editingId && (
         <div className="empty-state">
           <div className="empty-state__icon">🏥</div>
           <p className="empty-state__text">No vet visits logged yet.</p>
@@ -111,7 +121,10 @@ export default function VetVisits() {
             </div>
             <p className="list-item__sub">{v.clinic}{v.vet ? ` · ${v.vet}` : ""}</p>
             {v.notes && <p className="list-item__notes">{v.notes}</p>}
-            <button className="btn btn--danger btn--xs" onClick={() => handleDelete(v.id)}>Delete</button>
+            <div className="list-item__actions">
+              <button className="btn btn--secondary btn--xs" onClick={() => handleEdit(v)}>Edit</button>
+              <button className="btn btn--danger btn--xs" onClick={() => handleDelete(v.id)}>Delete</button>
+            </div>
           </div>
         ))}
       </div>

@@ -28,27 +28,31 @@ export default function Vaccines() {
   const [vaccines, setVaccines] = useState([]);
   const [form, setForm]         = useState(EMPTY_FORM);
   const [errors, setErrors]     = useState({});
-  const [adding, setAdding]     = useState(false);
+  const [editingId, setEditingId] = useState(null);
 
   useEffect(() => {
     if (activeDogId) setVaccines(getVaccines(activeDogId));
   }, [activeDogId]);
 
+  function handleAdd() { setForm(EMPTY_FORM); setErrors({}); setEditingId("new"); }
+
+  function handleEdit(v) {
+    setForm({ name: v.name, dateGiven: v.dateGiven, nextDueDate: v.nextDueDate });
+    setErrors({});
+    setEditingId(v.id);
+  }
+
   function handleSave() {
     const { valid, errors: errs } = validateVaccineForm(form);
     if (!valid) { setErrors(errs); return; }
     setErrors({});
-    saveVaccine({ ...form, dogId: activeDogId });
+    saveVaccine({ ...form, dogId: activeDogId, ...(editingId !== "new" ? { id: editingId } : {}) });
     setVaccines(getVaccines(activeDogId));
     setForm(EMPTY_FORM);
-    setAdding(false);
+    setEditingId(null);
   }
 
-  function handleCancel() {
-    setAdding(false);
-    setErrors({});
-    setForm(EMPTY_FORM);
-  }
+  function handleCancel() { setEditingId(null); setErrors({}); setForm(EMPTY_FORM); }
 
   function handleDelete(id) {
     if (!window.confirm("Delete this vaccine record?")) return;
@@ -62,13 +66,13 @@ export default function Vaccines() {
     <div className="page">
       <header className="page__header">
         <h1 className="page__title">💉 Vaccines</h1>
-        {!adding && <button className="btn btn--primary btn--sm" onClick={() => setAdding(true)}>+ Add</button>}
+        {!editingId && <button className="btn btn--primary btn--sm" onClick={handleAdd}>+ Add</button>}
       </header>
       {activeDog && <p className="page__dog-label">for {activeDog.name}</p>}
 
-      {adding && (
+      {editingId && (
         <div className="card">
-          <h2 className="card__title">New Vaccine</h2>
+          <h2 className="card__title">{editingId === "new" ? "New Vaccine" : "Edit Vaccine"}</h2>
           <div className="form">
             <label className="form__label">Vaccine Name *</label>
             <input className={`form__input ${errors.name ? "form__input--error" : ""}`}
@@ -85,20 +89,21 @@ export default function Vaccines() {
 
             <label className="form__label">Next Due Date</label>
             <input className={`form__input ${errors.nextDueDate ? "form__input--error" : ""}`}
-              type="date" value={form.nextDueDate}
-              min={form.dateGiven || today}
+              type="date" value={form.nextDueDate} min={form.dateGiven || today}
               onChange={e => setForm({ ...form, nextDueDate: e.target.value })} />
             <FieldError msg={errors.nextDueDate} />
 
             <div className="form__actions">
               <button className="btn btn--secondary" onClick={handleCancel}>Cancel</button>
-              <button className="btn btn--primary" onClick={handleSave}>Save</button>
+              <button className="btn btn--primary" onClick={handleSave}>
+                {editingId === "new" ? "Save" : "Update"}
+              </button>
             </div>
           </div>
         </div>
       )}
 
-      {vaccines.length === 0 && !adding && (
+      {vaccines.length === 0 && !editingId && (
         <div className="empty-state">
           <div className="empty-state__icon">💉</div>
           <p className="empty-state__text">No vaccines recorded yet.</p>
@@ -107,8 +112,7 @@ export default function Vaccines() {
 
       <div className="list">
         {vaccines.map(v => {
-          const status = getStatus(v.nextDueDate);
-          const badge  = STATUS_BADGE[status];
+          const badge = STATUS_BADGE[getStatus(v.nextDueDate)];
           return (
             <div key={v.id} className="list-item">
               <div className="list-item__header">
@@ -116,7 +120,10 @@ export default function Vaccines() {
                 <span className={badge.cls}>{badge.label}</span>
               </div>
               <p className="list-item__sub">Given: {v.dateGiven || "—"} · Due: {v.nextDueDate || "—"}</p>
-              <button className="btn btn--danger btn--xs" onClick={() => handleDelete(v.id)}>Delete</button>
+              <div className="list-item__actions">
+                <button className="btn btn--secondary btn--xs" onClick={() => handleEdit(v)}>Edit</button>
+                <button className="btn btn--danger btn--xs" onClick={() => handleDelete(v.id)}>Delete</button>
+              </div>
             </div>
           );
         })}
