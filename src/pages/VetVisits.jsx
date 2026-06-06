@@ -1,3 +1,4 @@
+import Footer from "../components/Footer";
 // src/pages/VetVisits.jsx
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
@@ -96,6 +97,7 @@ export default function VetVisits() {
           </div>
         ))}
       </div>
+          <Footer />
     </div>
   );
 }

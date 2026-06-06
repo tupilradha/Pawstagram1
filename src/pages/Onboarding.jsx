@@ -1,3 +1,4 @@
+import Footer from "../components/Footer";
 // src/pages/Onboarding.jsx
 import { useNavigate } from "react-router-dom";
 
@@ -41,6 +42,7 @@ export default function Onboarding() {
         </button>
         <p className="onboarding__note">No account needed · All data stays on your device</p>
       </div>
+          <Footer />
     </div>
   );
 }

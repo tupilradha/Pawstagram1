@@ -1,3 +1,4 @@
+import Footer from "../components/Footer";
 // src/pages/Vaccines.jsx
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
@@ -106,6 +107,7 @@ export default function Vaccines() {
           );
         })}
       </div>
+          <Footer />
     </div>
   );
 }

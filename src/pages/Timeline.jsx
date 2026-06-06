@@ -1,3 +1,4 @@
+import Footer from "../components/Footer";
 // src/pages/Timeline.jsx
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
@@ -290,6 +291,7 @@ export default function Timeline() {
           </div>
         ))}
       </div>
+          <Footer />
     </div>
   );
 }

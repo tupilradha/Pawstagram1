@@ -1,3 +1,4 @@
+import Footer from "../components/Footer";
 // src/pages/Home.jsx
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -97,6 +98,7 @@ export default function Home() {
           <div className="home-dark__add-label">Add dog</div>
         </div>
       </div>
+          <Footer />
     </div>
   );
 }

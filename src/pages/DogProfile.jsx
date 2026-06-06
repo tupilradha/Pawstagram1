@@ -1,3 +1,4 @@
+import Footer from "../components/Footer";
 // src/pages/DogProfile.jsx
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -130,6 +131,7 @@ export default function DogProfile() {
           </button>
         </div>
       </div>
+          <Footer />
     </div>
   );
 }

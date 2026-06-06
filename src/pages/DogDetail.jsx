@@ -1,3 +1,4 @@
+import Footer from "../components/Footer";
 // src/pages/DogDetail.jsx
 import { useNavigate, useParams } from "react-router-dom";
 import { useDog } from "../context/DogContext";
@@ -123,6 +124,7 @@ export default function DogDetail() {
           </div>
         ))}
       </div>
+          <Footer />
     </div>
   );
 }
