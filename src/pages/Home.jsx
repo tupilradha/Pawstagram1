@@ -52,6 +52,7 @@ export default function Home() {
         <div>
           <h1 className="home-dark__title">PawLog 🐾</h1>
           <p className="home-dark__date">{formatDate()}</p>
+          <p className="home-dark__tagline">Every wag, every visit, every moment matters. Because they can't tell you when something's wrong. PawLog keeps track, so you never miss a thing.</p>
         </div>
         <button className="home-dark__add-btn" onClick={() => navigate("/profile/new")} aria-label="Add dog">+</button>
       </div>
