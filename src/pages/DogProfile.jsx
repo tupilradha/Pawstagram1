@@ -126,9 +126,14 @@ export default function DogProfile() {
           <div className="form__char-count">{form.bio.length}/300</div>
           <FieldError msg={errors.bio} />
 
-          <button className="btn btn--primary" style={{ marginTop: 8 }} onClick={handleSave}>
-            {isNew ? "Add Dog" : "Save Changes"}
-          </button>
+          <div className="form__actions" style={{ marginTop: 8 }}>
+            <button className="btn btn--secondary" onClick={() => navigate("/")}>
+              Cancel
+            </button>
+            <button className="btn btn--primary" onClick={handleSave}>
+              {isNew ? "Add Dog" : "Save Changes"}
+            </button>
+          </div>
         </div>
       </div>
           <Footer />
