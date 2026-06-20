@@ -1,8 +1,11 @@
+import { useState } from "react";
 import Footer from "../components/Footer";
 // src/pages/DogDetail.jsx
 import { useNavigate, useParams } from "react-router-dom";
 import { useDog } from "../context/DogContext";
-import { getVetVisits, getVaccines, getMedications, getSymptoms } from "../db/db";
+import { getVetVisits, getVaccines, getMedications, getSymptoms, getDogRecordCounts, deleteDog, saveDog } from "../db/db";
+import { isValidImageSize } from "../utils/validate";
+import FieldError from "../components/FieldError";
 
 const AVATAR_COLORS = [
   { bg: "#26215C", color: "#AFA9EC" },
@@ -31,11 +34,39 @@ function isActive(med) {
 
 export default function DogDetail() {
   const { id } = useParams();
-  const { dogs } = useDog();
+  const { dogs, refreshDogs } = useDog();
   const navigate = useNavigate();
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [photoError, setPhotoError] = useState(null);
 
   const dogIndex = dogs.findIndex(d => d.id === id);
   const dog = dogs[dogIndex] || null;
+
+  function handleQuickPhotoChange(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (!isValidImageSize(file)) {
+      setPhotoError("Photo must be under 1MB. Please choose a smaller image.");
+      return;
+    }
+    setPhotoError(null);
+    const reader = new FileReader();
+    reader.onload = ev => {
+      saveDog({ ...dog, id: dog.id, photoUrl: ev.target.result });
+      refreshDogs();
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function handleDeleteClick() {
+    setShowDeleteConfirm(true);
+  }
+
+  function handleConfirmDelete() {
+    deleteDog(id);
+    refreshDogs();
+    navigate("/");
+  }
 
   if (!dog) {
     return (
@@ -55,6 +86,8 @@ export default function DogDetail() {
   const symptoms  = getSymptoms(id);
   const activeMeds = meds.filter(isActive);
   const vacStatus = getStatus(vaccines);
+  const counts    = getDogRecordCounts(id);
+  const totalRecords = counts.vetVisits + counts.vaccines + counts.medications + counts.symptoms;
 
   const tiles = [
     {
@@ -95,11 +128,13 @@ export default function DogDetail() {
 
       {/* Dog card */}
       <div className="detail-profile">
-        <div className="detail-profile__avatar" style={{ background: av.bg, color: av.color }}>
+        <label className="detail-profile__avatar detail-profile__avatar--editable" style={{ background: av.bg, color: av.color }}>
           {dog.photoUrl
             ? <img src={dog.photoUrl} alt={dog.name} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }} />
             : dog.name?.[0]?.toUpperCase() || "?"}
-        </div>
+          <span className="detail-profile__avatar-edit-badge">📷</span>
+          <input type="file" accept="image/*" onChange={handleQuickPhotoChange} style={{ display: "none" }} />
+        </label>
         <div className="detail-profile__info">
           <h1 className="detail-profile__name">{dog.name}</h1>
           <p className="detail-profile__meta">
@@ -107,8 +142,36 @@ export default function DogDetail() {
           </p>
           {dog.bio && <p className="detail-profile__bio">{dog.bio}</p>}
         </div>
-        <button className="detail-profile__edit" onClick={() => navigate(`/profile/${id}`)}>Edit</button>
+        <div className="detail-profile__actions">
+          <button className="detail-profile__edit" onClick={() => navigate(`/profile/${id}`)}>Edit</button>
+          <button className="detail-profile__delete" onClick={handleDeleteClick}>Delete</button>
+        </div>
       </div>
+      <FieldError msg={photoError} />
+
+      {/* Delete confirmation modal */}
+      {showDeleteConfirm && (
+        <div className="modal-backdrop" onClick={() => setShowDeleteConfirm(false)}>
+          <div className="modal-card" onClick={e => e.stopPropagation()}>
+            <h2 className="modal-card__title">Delete {dog.name}?</h2>
+            <p className="modal-card__body">
+              This will permanently delete {dog.name}'s profile and all of the following:
+            </p>
+            <ul className="modal-card__list">
+              {counts.vetVisits > 0   && <li>🏥 {counts.vetVisits} vet visit{counts.vetVisits > 1 ? "s" : ""}</li>}
+              {counts.vaccines > 0    && <li>💉 {counts.vaccines} vaccine{counts.vaccines > 1 ? "s" : ""}</li>}
+              {counts.medications > 0 && <li>💊 {counts.medications} medication{counts.medications > 1 ? "s" : ""}</li>}
+              {counts.symptoms > 0    && <li>📝 {counts.symptoms} symptom{counts.symptoms > 1 ? "s" : ""}</li>}
+              {totalRecords === 0     && <li>No health records — just the profile.</li>}
+            </ul>
+            <p className="modal-card__warning">This cannot be undone.</p>
+            <div className="form__actions">
+              <button className="btn btn--secondary" onClick={() => setShowDeleteConfirm(false)}>Cancel</button>
+              <button className="btn btn--danger" style={{ flex: 1 }} onClick={handleConfirmDelete}>Delete Everything</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Health section tiles */}
       <div className="detail-tiles">

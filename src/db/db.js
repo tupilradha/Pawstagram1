@@ -51,6 +51,18 @@ export function saveDog(dog) {
   writeDB(db);
 }
 
+// Returns counts of every record type linked to a dog —
+// used to show a cascade-delete preview before the user confirms.
+export function getDogRecordCounts(id) {
+  const db = readDB();
+  return {
+    vetVisits:   db.vetVisits.filter((r) => r.dogId === id).length,
+    vaccines:    db.vaccines.filter((r) => r.dogId === id).length,
+    medications: db.medications.filter((r) => r.dogId === id).length,
+    symptoms:    db.symptoms.filter((r) => r.dogId === id).length,
+  };
+}
+
 export function deleteDog(id) {
   const db = readDB();
   db.dogs = db.dogs.filter((d) => d.id !== id);
@@ -92,6 +104,18 @@ export function getVaccines(dogId) {
   return readDB().vaccines
     .filter((v) => v.dogId === dogId)
     .sort((a, b) => new Date(a.nextDueDate) - new Date(b.nextDueDate));
+}
+
+// Returns true if a vaccine with the same name + dateGiven already
+// exists for this dog (excluding the record currently being edited).
+export function isDuplicateVaccine(dogId, name, dateGiven, excludeId = null) {
+  const db = readDB();
+  return db.vaccines.some((v) =>
+    v.dogId === dogId &&
+    v.id !== excludeId &&
+    v.name.trim().toLowerCase() === name.trim().toLowerCase() &&
+    v.dateGiven === dateGiven
+  );
 }
 
 export function saveVaccine(vaccine) {

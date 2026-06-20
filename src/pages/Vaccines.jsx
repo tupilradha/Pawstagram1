@@ -2,7 +2,7 @@ import Footer from "../components/Footer";
 // src/pages/Vaccines.jsx
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getVaccines, saveVaccine, deleteVaccine, getDog } from "../db/db";
+import { getVaccines, saveVaccine, deleteVaccine, getDog, isDuplicateVaccine } from "../db/db";
 import { validateVaccineForm } from "../utils/validate";
 import FieldError from "../components/FieldError";
 
@@ -42,6 +42,13 @@ export default function Vaccines() {
   function handleSave() {
     const { valid, errors: errs } = validateVaccineForm(form);
     if (!valid) { setErrors(errs); return; }
+
+    const excludeId = editingId === "new" ? null : editingId;
+    if (isDuplicateVaccine(dogId, form.name, form.dateGiven, excludeId)) {
+      setErrors({ name: `${dog?.name || "This dog"} already has "${form.name}" recorded on ${form.dateGiven}.` });
+      return;
+    }
+
     saveVaccine({ ...form, dogId, ...(editingId !== "new" ? { id: editingId } : {}) });
     setVaccines(getVaccines(dogId));
     setEditingId(null); setForm(EMPTY); setErrors({});
